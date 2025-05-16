@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Water Monitoring</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    #weather-container.weather-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap; 
+      gap: 16px; 
+    }
+  
+    .weather-card {
+      width: 140px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+  
+    .weather-card-header {
+      background-color: #a6cf4a;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      padding: 6px 0;
+      font-size: 13px;
+    }
+  
+    .weather-card-body {
+      text-align: center;
+      padding: 10px 6px;
+    }
+  
+    .weather-icon {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 6px;
+    }
+  
+    .temperature {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+  
+    .condition {
+      font-size: 12px;
+      color: #555;
+    }
+  </style>      
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #2c3e50;
+      color: white;
+      padding: 15px 30px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    #analyzeBtn {
+      background-color: #26a69a;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      font-size: 1rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #analyzeBtn:hover {
+      background-color: #2bbbad;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    #aiResult {
+      margin: 20px 30px;
+      background-color: white;
+      padding: 16px;
+      border-left: 5px solid #26a69a;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 20px;
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+      .chart-container {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s;
+    }
+
+    .chart-container:hover {
+        transform: translateY(-4px);
+    }
+
+    .chart-container h3 {
+        text-align: center;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        color: #333;
+    }
+
+    #updateTime {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 20px;
+    }
+
+    .menu-icon {
+      display: none;
+      font-size: 26px;
+      cursor: pointer;
+      color: white;
+    }
+
+    #nav-mobile {
+      display: flex;
+      justify-content: center;
+      background-color: #34495e;
+      flex-wrap: wrap;
+    }
+
+    #nav-mobile a {
+      color: white;
+      text-decoration: none;
+      margin: 10px 15px;
+    }
+
+    @media (max-width: 767px) {
+      .container {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+
+      #aiResult {
+        margin: 15px;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      #analyzeBtn {
+        margin-top: 10px;
+      }
+    }
+  </style>
+
+  <style>
+    #popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #popup iframe {
+      width: 400px;
+      height: 550px;
+      max-height: 90%;
+      border: none;
+      border-radius: 30px;
+    }
+    
+    #popup .close-btn {
+      position: absolute;
+      top: 150px;
+      right: 530px;
+      font-size: 35px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 style="font-size: 40px; font-weight: bold;">💧Water Monitoring</h1>
+    <button id="analyzeBtn">
+      🤖 Phân Tích AI
+    </button>
+  </header>
+  <div id="aiResult">Kết quả phân tích AI</div>
+
+  <div style="text-align: center; margin-bottom: 12px;">
+    <h2 style="font-size: 25px; font-weight: bold;">🌤️ Dự Báo Thời Tiết</h2>
+  </div>
+  <div id="weather-container" class="weather-row"></div>
+
+  <div style="text-align: center; margin: 20px 0;">
+    <a href="#" onclick="event.preventDefault(); openPopup()"
+       style="
+          display: inline-block;
+          background-color: #4caf50;
+          color: white;
+          padding: 12px 20px;
+          border-radius: 8px;
+          text-decoration: none;
+          font-weight: bold;
+          font-size: 16px;
+          transition: background-color 0.3s ease;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+       "
+       onmouseover="this.style.backgroundColor='#43a047'"
+       onmouseout="this.style.backgroundColor='#4caf50'">
+      ⚙️ Điều Khiển Hệ Thống
+    </a>
+  </div>
+  
+  <div id="popup">
+    <div class="close-btn" onclick="closePopup()">×</div>
+    <iframe src="setting.html"></iframe>
+  </div>
+  <p id="updateTime">Lần cập nhật cuối: <span id="lastUpdateTime">Chưa có</span></p>
+
+  <div id="nav-mobile">
+    <a href="#waterTempChart">Nhiệt độ nước</a>
+    <a href="#tempChart">Nhiệt độ</a>
+    <a href="#humidityChart">Độ ẩm</a>
+    <a href="#phChart">pH</a>
+    <a href="#tdsChart">TDS</a>
+    <a href="#turbidityChart">Độ đục</a>
+    <a href="#waterLevelChart">Mực nước</a>
+  </div>
+
+  <main>
+    <div class="container">
+      <div class="chart-container">
+        <h3>Nhiệt độ nước (°C)</h3>
+        <canvas id="waterTempChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>Nhiệt độ không khí (°C)</h3>
+        <canvas id="tempChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>Độ ẩm (%)</h3>
+        <canvas id="humidityChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>pH</h3>
+        <canvas id="phChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>TDS</h3>
+        <canvas id="tdsChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>Độ đục</h3>
+        <canvas id="turbidityChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>Mực nước (cm)</h3>
+        <canvas id="waterLevelChart"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <!-- Script xử lý AI -->
+  <script>
+    async function analyzeData() {
+      const analyzeBtn = document.getElementById("analyzeBtn");
+      const resultDiv = document.getElementById("aiResult");
+
+      analyzeBtn.disabled = true;
+      analyzeBtn.innerHTML = '⏳ Đang phân tích... <span class="spinner"></span>';
+      resultDiv.innerHTML = "⏳ Đang phân tích dữ liệu...";
+
+      try {
+        const response = await fetch("http://localhost:3000/analyze");
+        if (!response.ok) throw new Error(`Lỗi HTTP: ${response.status}`);
+
+        const data = await response.json();
+        if (data && data.result) {
+          resultDiv.innerHTML = `<p><strong>✅ Kết quả phân tích:</strong><br>${data.result}</p>`;
+        } else {
+          resultDiv.innerHTML = `<p><strong>⚠️ Lỗi:</strong> Không có kết quả từ AI.</p>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p><strong>❌ Lỗi:</strong> ${error.message}</p>`;
+      } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtn.innerHTML = "🔍 Phân Tích AI";
+      }
+    }
+
+    document.getElementById("analyzeBtn").addEventListener("click", analyzeData);
+  </script>
+  
+  <script>
+    const API_KEY = "52a8ca6407b847be90391627250505"; // 🔁 Thay bằng API key thật từ WeatherAPI.com
+    const LOCATION = "Hanoi";
+  
+    async function fetchWeather() {
+      try {
+        const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${LOCATION}&days=4&lang=vi`);
+        const data = await res.json();
+        const forecastDiv = document.getElementById("weather-container");
+        forecastDiv.innerHTML = "";
+  
+        if (data.forecast && data.forecast.forecastday) {
+          data.forecast.forecastday.forEach(day => {
+            const date = new Date(day.date);
+            const weekday = date.toLocaleDateString('vi-VN', { weekday: 'long' }).toUpperCase();
+            const icon = day.day.condition.icon;
+            const condition = day.day.condition.text;
+            const temp = Math.round(day.day.avgtemp_c);
+  
+            forecastDiv.innerHTML += `
+              <div class="weather-card">
+                <div class="weather-card-header">${weekday}</div>
+                <div class="weather-card-body">
+                  <img src="https:${icon}" alt="${condition}" class="weather-icon">
+                  <div class="temperature">${temp}°</div>
+                  <div class="condition">${condition}</div>
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          forecastDiv.innerHTML = "<p>Không lấy được dữ liệu thời tiết.</p>";
+        }
+      } catch (err) {
+        document.getElementById("weather-container").innerHTML = "<p>Lỗi khi lấy dữ liệu thời tiết.</p>";
+        console.error(err);
+      }
+    }
+  
+    fetchWeather();
+  </script> 
+  
+  <script>
+    function openPopup() {
+      document.getElementById("popup").style.display = "flex";
+    }
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+  </script>
+
+  <script type="module" src="data.js"></script>
+</body>
+</html>

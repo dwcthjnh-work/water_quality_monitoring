@@ -1,0 +1,25 @@
+[1/9] Performing build step for 'bootloader'
+[1/1] C:\WINDOWS\system32\cmd.exe /C "cd /D A:\water_quality_monitoring\esp32_code\build\bootloader\esp-idf\esptool_py && A:\ESP32\Espressif\python_env\idf5.1_py3.11_env\Scripts\python.exe A:/ESP32/Espressif/frameworks/esp-idf-v5.1.6/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 A:/water_quality_monitoring/esp32_code/build/bootloader/bootloader.bin"
+Bootloader binary size 0x68a0 bytes. 0x760 bytes (7%) free.
+[2/9] No install step for 'bootloader'
+[3/9] Completed 'bootloader'
+[4/9] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj
+A:/water_quality_monitoring/esp32_code/main/app_main.c: In function 'vTask_uart':
+A:/water_quality_monitoring/esp32_code/main/app_main.c:224:12: warning: unused variable 'buffered_size' [-Wunused-variable]
+  224 |     size_t buffered_size;
+      |            ^~~~~~~~~~~~~
+A:/water_quality_monitoring/esp32_code/main/app_main.c: At top level:
+A:/water_quality_monitoring/esp32_code/main/app_main.c:95:33: warning: 'client' defined but not used [-Wunused-variable]
+   95 | static esp_http_client_handle_t client = NULL;
+      |                                 ^~~~~~
+[5/9] Linking C static library esp-idf\main\libmain.a
+[6/9] Generating ld/sections.ld
+[7/9] Linking CXX executable wifi_station.elf
+[8/9] Generating binary image from built executable
+esptool.py v4.7.0
+Creating esp32 image...
+Merged 27 ELF sections
+Successfully created esp32 image.
+Generated A:/water_quality_monitoring/esp32_code/build/wifi_station.bin
+[9/9] C:\WINDOWS\system32\cmd.exe /C "cd /D A:\water_quality_monitoring\esp32_code\build\esp-idf\esptool_py && A:\ESP32\Espressif\python_env\idf5.1_py3.11_env\Scripts\python.exe A:/ESP32/Espressif/frameworks/esp-idf-v5.1.6/components/partition_table/check_sizes.py --offset 0x8000 partition --type app A:/water_quality_monitoring/esp32_code/build/partition_table/partition-table.bin A:/water_quality_monitoring/esp32_code/build/wifi_station.bin"
+wifi_station.bin binary size 0xee740 bytes. Smallest app partition is 0x100000 bytes. 0x118c0 bytes (7%) free.

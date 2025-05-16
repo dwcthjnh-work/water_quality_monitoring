@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Điều Khiển Hệ Thống</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-transparent min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+    <h2 class="text-2xl font-bold mb-4 text-center">⚙️ Điều Khiển Hệ Thống</h2>
+
+    <h3 class="font-semibold text-lg mb-2">Chế Độ Hoạt Động</h3>
+    <div class="flex justify-center mb-4">
+      <button id="autoTab" onclick="setMode('auto')" class="tab w-1/2 px-4 py-2 rounded-l-full font-bold bg-green-500 text-white">Auto</button>
+      <button id="manualTab" onclick="setMode('manual')" class="tab w-1/2 px-4 py-2 rounded-r-full font-bold bg-gray-300">Manual</button>
+    </div>
+
+    <div id="manualSettings" class="mb-4">
+      <h3 class="font-semibold mb-2">Điều Khiển Relay</h3>
+      <div class="flex justify-between items-center mb-2">
+        <span>💧 Máy lọc</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="relay1" class="sr-only peer">
+          <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-checked:bg-green-500 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+        </label>
+      </div>
+      <div class="flex justify-between items-center mb-2">
+        <span>🌬️ Sủi</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="relay2" class="sr-only peer">
+          <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-checked:bg-green-500 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+        </label>
+      </div>
+
+      <!-- Nút gạt cho máy sưởi -->
+      <div class="flex justify-between items-center mb-2">
+        <span>🔥 Máy sưởi</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="relay3" class="sr-only peer">
+          <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-checked:bg-green-500 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+        </label>
+      </div>
+    </div>
+
+    <div id="autoSettings" class="mb-4">
+      <h3 class="font-semibold mb-2">Cài Đặt Ngưỡng</h3>
+      <div class="mb-2">
+        <label class="block">Ngưỡng Độ Đục (Turbidity)</label>
+        <input type="number" id="turbidity" value="50" min="0" max="1000" class="w-full p-2 border rounded">
+      </div>
+      <div class="mb-2">
+        <label class="block">Ngưỡng TDS</label>
+        <input type="number" id="TDS" value="200" min="0" max="2000" class="w-full p-2 border rounded">
+      </div>
+    </div>
+
+    <h3 class="font-semibold mb-2">Điều Khiển UV</h3>
+    <div class="flex justify-between items-center mb-4">
+      <span>☀️ UV</span>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" id="relay4" class="sr-only peer">
+        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-checked:bg-green-500 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+      </label>
+    </div>
+
+    <button onclick="sendData()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded">Gửi Dữ Liệu</button>
+  </div>
+
+  <script>
+    var firebaseConfig = {
+      apiKey: "your_apiKey",
+      authDomain: "your_authDomain",
+      databaseURL: "your_databaseURL",
+      projectId: "your_projectId",
+      storageBucket: "your_storageBucket",
+      messagingSenderId: "your_messagingSenderId",
+      appId: "your_appId",
+      measurementId: "your_measurementId"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    var database = firebase.database();
+
+    function setMode(mode) {
+      document.getElementById("manualSettings").classList.toggle("hidden", mode !== "manual");
+      document.getElementById("autoSettings").classList.toggle("hidden", mode !== "auto");
+
+      document.getElementById("autoTab").classList.toggle("bg-green-500", mode === "auto");
+      document.getElementById("autoTab").classList.toggle("bg-gray-300", mode !== "auto");
+      document.getElementById("manualTab").classList.toggle("bg-green-500", mode === "manual");
+      document.getElementById("manualTab").classList.toggle("bg-gray-300", mode !== "manual");
+    }
+
+    function sendData() {
+      let mode = document.getElementById("autoTab").classList.contains("bg-green-500") ? "auto" : "manual";
+      let controlData = {
+        "mode": mode,
+        "relay1": document.getElementById("relay1").checked ? 1 : 0,
+        "relay2": document.getElementById("relay2").checked ? 1 : 0,
+        "relay3": document.getElementById("relay3").checked ? 1 : 0,
+        "relay4": document.getElementById("relay4").checked ? 1 : 0,
+        "turbidity": parseInt(document.getElementById("turbidity").value),
+        "TDS": parseInt(document.getElementById("TDS").value)
+      };
+
+      database.ref("/Control").set(controlData)
+        .then(() => alert("🚀 Dữ liệu đã gửi lên Firebase!"))
+        .catch(error => alert("❌ Lỗi: " + error.message));
+
+      localStorage.setItem("mode", mode);
+      localStorage.setItem("relay1", document.getElementById("relay1").checked);
+      localStorage.setItem("relay2", document.getElementById("relay2").checked);
+      localStorage.setItem("relay3", document.getElementById("relay3").checked);
+      localStorage.setItem("relay4", document.getElementById("relay4").checked);  
+      localStorage.setItem("turbidity", document.getElementById("turbidity").value);
+      localStorage.setItem("TDS", document.getElementById("TDS").value);
+    }
+
+    window.onload = function () {
+      const savedMode = localStorage.getItem("mode") || "auto";
+      setMode(savedMode);
+      document.getElementById("relay1").checked = localStorage.getItem("relay1") === "true";
+      document.getElementById("relay2").checked = localStorage.getItem("relay2") === "true";
+      document.getElementById("relay3").checked = localStorage.getItem("relay3") === "true";
+      document.getElementById("relay4").checked = localStorage.getItem("relay4") === "true"; 
+      document.getElementById("turbidity").value = localStorage.getItem("turbidity") || 50;
+      document.getElementById("TDS").value = localStorage.getItem("TDS") || 200;
+    }
+  </script> 
+</body>
+</html>
