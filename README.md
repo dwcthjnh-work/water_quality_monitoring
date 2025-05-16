@@ -19,7 +19,7 @@ Hệ thống giám sát chất lượng môi trường nước theo thời gian 
 5. Firebase đã cấu hình trong `web/firebase-config.js`
 
 ## 📷 Hình ảnh
-![Giao diện web](images/web_interface.png)
+![Giao diện web](images/web_interface_01.jpg)
 
 ## 📽 Video demo
 Xem tại: [video_demo/demo.mp4](video_demo/demo.mp4)
